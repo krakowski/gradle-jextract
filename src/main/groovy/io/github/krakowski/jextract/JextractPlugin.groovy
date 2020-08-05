@@ -29,17 +29,23 @@ class JextractPlugin implements Plugin<Project> {
             project.sourceSets {
                 main {
                     java.srcDirs += jextractTask.outputDir
+
+                    // This is necessary since jextract generates a
+                    // compiled class file containing constants
+                    compileClasspath += project.files(jextractTask.outputDir)
+                    runtimeClasspath += project.files(jextractTask.outputDir)
+                }
+            }
+
+            // Include all generated classes inside our jar archive
+            project.jar {
+                from(jextractTask.outputDir) {
+                    include '**/*.class'
                 }
             }
 
             // We need to add the foreign module, so the compiler sees its classes
             project.compileJava.options.compilerArgs += [ '--add-modules', 'jdk.incubator.foreign' ]
-
-            project.dependencies {
-                // This is necessary since jextract generates a
-                // compiled class file containing constants
-                implementation project.files(jextractTask.outputDir)
-            }
 
             // The java compiler should only be invoked after
             // jextract generated its source files
