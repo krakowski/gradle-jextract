@@ -3,17 +3,9 @@ package io.github.krakowski.jextract
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.TaskAction
-
+import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 
 import java.nio.file.Files
@@ -40,6 +32,11 @@ class JextractTask extends DefaultTask {
      */
     @Input
     final Property<String> targetPackage = project.objects.property(String)
+
+    @Optional
+    @Input
+    final Property<String> javaHome = project.objects.property(String)
+        .convention(Jvm.current().javaHome.absolutePath)
 
     /**
      * Directories which should be included during code generation.
@@ -99,16 +96,17 @@ class JextractTask extends DefaultTask {
         arguments.add(outputDir.get().toString())
 
         // Check if jextract is present
-        String jvmHome = Jvm.current().javaHome.absolutePath
-        Path jextractPath = Paths.get(jvmHome, "bin/jextract")
+
+        String javaPath = javaHome.get()
+        Path jextractPath = Paths.get(javaPath, "bin/jextract")
         if (!Files.exists(jextractPath)) {
-            throw new GradleException("jextract binary could not be found (JVM_HOME=${jvmHome})")
+            throw new GradleException("jextract binary could not be found (JVM_HOME=${javaPath})")
         }
 
         execute("${jextractPath.toAbsolutePath()} --source ${arguments.join(" ")} ${header.get()}")
     }
 
-    private void execute(String command) {
+    private static void execute(String command) {
 
         // Create buffers for stdout and stderr streams
         StringBuffer stdout = new StringBuffer()
