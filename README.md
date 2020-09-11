@@ -6,7 +6,7 @@ Since the plugin is available on [Gradle's Plugin Portal](https://plugins.gradle
 
 ```gradle
 plugins {
-  id "io.github.krakowski.jextract" version "0.1.0"
+  id "io.github.krakowski.jextract" version "0.1.3"
 }
 ```
 
@@ -36,12 +36,13 @@ The `jextract` task exposes the following configuration options.
 |  `targetPackage` |        `java.lang.String`       | :black_circle: | The package under which all bindings will be generated                     |
 |    `includes`    |       `java.lang.String[]`      |                | A list of directories which should be included during code generation      |
 |     `header`     |        `java.lang.String`       | :black_circle: | The header file jextract should parse                                      |
+|   `sourceMode`   |       `java.lang.Boolean`       |                | Generate source files instead of class files                               |
 |    `outputDir`   | `org.gradle.api.file.Directory` |                | The output directory under which the generated source files will be placed |
 
 ## :wrench: &nbsp; Requirements
 
-  * [OpenJDK 15 + Project Panama](https://github.com/openjdk/panama-foreign/tree/foreign-jextract)
-  * [LLVM 9.X](https://releases.llvm.org/download.html)
+  * [OpenJDK 16 + Project Panama](https://github.com/openjdk/panama-foreign/tree/foreign-jextract)
+  * [LLVM 9+](https://releases.llvm.org/download.html)
   
 ## :scroll: &nbsp; License
 

@@ -33,6 +33,13 @@ class JextractTask extends DefaultTask {
     @Input
     final Property<String> targetPackage = project.objects.property(String)
 
+    /**
+     * Whether to generate sources or precompiled class files
+     */
+    @Input
+    final Property<Boolean> sourceMode = project.objects.property(Boolean)
+        .convention(false)
+
     @Optional
     @Input
     final Property<String> javaHome = project.objects.property(String)
@@ -64,6 +71,11 @@ class JextractTask extends DefaultTask {
     def action() {
 
         List<String> arguments = new ArrayList<>()
+
+        // Add source mode flag if it was enabled by the user
+        if (sourceMode.get()) {
+            arguments.add("--source")
+        }
 
         // Add clang arguments if they are present
         if (clangArguments.isPresent()) {
@@ -103,7 +115,7 @@ class JextractTask extends DefaultTask {
             throw new GradleException("jextract binary could not be found (JVM_HOME=${javaPath})")
         }
 
-        execute("${jextractPath.toAbsolutePath()} --source ${arguments.join(" ")} ${header.get()}")
+        execute("${jextractPath.toAbsolutePath()} ${arguments.join(" ")} ${header.get()}")
     }
 
     private static void execute(String command) {
