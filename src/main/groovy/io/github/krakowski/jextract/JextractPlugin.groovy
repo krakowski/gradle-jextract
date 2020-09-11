@@ -37,6 +37,11 @@ class JextractPlugin implements Plugin<Project> {
                 }
             }
 
+            // This is necessary in case we use class file mode
+            project.dependencies {
+                implementation project.files(jextractTask.outputDir)
+            }
+
             // Include all generated classes inside our jar archive
             project.jar {
                 from(jextractTask.outputDir) {
