@@ -25,7 +25,7 @@ class JextractTask extends DefaultTask {
      * The library which should be used for generating native bindings.
      */
     @Input
-    final Property<String> library = project.objects.property(String)
+    final ListProperty<String> libraries = project.objects.listProperty(String)
 
     /**
      * The package under which all bindings will be generated.
@@ -51,6 +51,13 @@ class JextractTask extends DefaultTask {
     @Optional
     @Input
     final ListProperty<String> includes = project.objects.listProperty(String)
+
+    /**
+     * Whitelist of header files which should be used for code generation.
+     */
+    @Optional
+    @Input
+    final ListProperty<String> filters = project.objects.listProperty(String)
 
     /**
      * The header file which should be parsed by jextract.
@@ -83,6 +90,14 @@ class JextractTask extends DefaultTask {
             arguments.add(clangArguments.get())
         }
 
+        // Add filters if they are present
+        if (filters.isPresent()) {
+            filters.get().forEach { filter ->
+                arguments.add("--filter")
+                arguments.add(filter)
+            }
+        }
+
         // Add include paths if they are present
         if (includes.isPresent()) {
             includes.get().forEach { include ->
@@ -91,10 +106,16 @@ class JextractTask extends DefaultTask {
             }
         }
 
-        // Add library name if it is present
-        if (library.isPresent()) {
-            arguments.add("-l")
-            arguments.add(library.get())
+        // Add library names if they are present
+        if (libraries.isPresent()) {
+            if (libraries.get().isEmpty()) {
+                throw new GradleException("At least on library has to be specified")
+            }
+
+            libraries.get().forEach { library ->
+                arguments.add("-l")
+                arguments.add(library)
+            }
         }
 
         // Add target package if it is present
@@ -108,7 +129,6 @@ class JextractTask extends DefaultTask {
         arguments.add(outputDir.get().toString())
 
         // Check if jextract is present
-
         String javaPath = javaHome.get()
         Path jextractPath = Paths.get(javaPath, "bin/jextract")
         if (!Files.exists(jextractPath)) {

@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'io.github.krakowski'
-version = '0.1.4'
+version = '0.1.5'
 
 repositories {
     mavenCentral()
@@ -41,5 +41,5 @@ pluginBundle {
 
 
 wrapper {
-    gradleVersion = "6.5.1"
+    gradleVersion = "6.8.2"
 }
