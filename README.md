@@ -6,7 +6,7 @@ Since the plugin is available on [Gradle's Plugin Portal](https://plugins.gradle
 
 ```gradle
 plugins {
-  id "io.github.krakowski.jextract" version "0.1.5"
+  id "io.github.krakowski.jextract" version "0.1.6"
 }
 ```
 
@@ -14,14 +14,17 @@ Applying the plugin adds the `jextract` task which can be configured by the buil
 
 ```gradle
 jextract {
-    // The library name
-    libraries = [ 'stdc++' ]
 
-    // The package under which all source files will be generated
-    targetPackage = 'org.unix'
-
-    // The header file jextract should parse
-    header = "${project.projectDir}/src/main/c/stdio.h"
+    fromHeader("${project.projectDir}/src/main/c/stdio.h"= {
+        // The library name
+        libraries = [ 'stdc++' ]
+    
+        // The package under which all source files will be generated
+        targetPackage = 'org.unix'
+        
+        // The generated class name
+        className = 'Linux'
+    }
 }
 ```
 
@@ -29,16 +32,21 @@ jextract {
 
 The `jextract` task exposes the following configuration options.
 
-|       Name       |               Type              |    Required    | Description                                                                     |
-|:----------------:|:-------------------------------:|:--------------:|---------------------------------------------------------------------------------|
-| `clangArguments` |        `java.lang.String`       |                | Arguments which should be passed to clang                                       |
-|   `libraries`    |       `java.lang.String[]`      | :black_circle: | The libraries against which the native code will link                           |
-|  `targetPackage` |        `java.lang.String`       | :black_circle: | The package under which all bindings will be generated                          |
-|    `includes`    |       `java.lang.String[]`      |                | A list of directories which should be included during code generation           |
-|     `header`     |        `java.lang.String`       | :black_circle: | The header file jextract should parse                                           |
-|    `filters`     |       `java.lang.String[]`      |                | Whitelist for header files. Checks absolute paths for existence of substring    |
-|   `sourceMode`   |       `java.lang.Boolean`       |                | Generate source files instead of class files                                    |
-|    `outputDir`   | `org.gradle.api.file.Directory` |                | The output directory under which the generated source files will be placed      |
+|       Name       |               Type              |    Required    | Description                                                                |
+|:----------------:|:-------------------------------:|:--------------:|----------------------------------------------------------------------------|
+| `clangArguments` |        `java.lang.String`       |                | Arguments which should be passed to clang                                  |
+|    `libraries`   |       `java.lang.String[]`      | :black_circle: | The libraries against which the native code will link                      |
+|    `includes`    |       `java.lang.String[]`      |                | A list of directories which should be included during code generation      |
+|  `targetPackage` |        `java.lang.String`       | :black_circle: | The package under which all bindings will be generated                     |
+|    `className`   |        `java.lang.String`       |                | The generated class file's name                                            |
+|    `functions`   |       `java.lang.String[]`      |                | Whitelist of function symbols                                              |
+|     `macros`     |       `java.lang.String[]`      |                | Whitelist of macro symbols                                                 |
+|     `structs`    |       `java.lang.String[]`      |                | Whitelist of struct symbols                                                |
+|    `typedefs`    |       `java.lang.String[]`      |                | Whitelist of typedef symbols                                               |
+|     `unions`     |       `java.lang.String[]`      |                | Whitelist of union symbols                                                 |
+|    `variables`   |       `java.lang.String[]`      |                | Whitelist of global variable symbols                                       |
+|   `sourceMode`   |       `java.lang.Boolean`       |                | Generate source files instead of class files                               |
+|    `outputDir`   | `org.gradle.api.file.Directory` |                | The output directory under which the generated source files will be placed |
 
 ## :wrench: &nbsp; Requirements
 

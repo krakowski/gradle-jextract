@@ -1,5 +1,6 @@
 package io.github.krakowski.jextract
 
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
@@ -22,24 +23,15 @@ class JextractTask extends DefaultTask {
     final Property<String> clangArguments = project.objects.property(String)
 
     /**
-     * The library which should be used for generating native bindings.
-     */
-    @Input
-    final ListProperty<String> libraries = project.objects.listProperty(String)
-
-    /**
-     * The package under which all bindings will be generated.
-     */
-    @Input
-    final Property<String> targetPackage = project.objects.property(String)
-
-    /**
      * Whether to generate sources or precompiled class files
      */
     @Input
     final Property<Boolean> sourceMode = project.objects.property(Boolean)
         .convention(false)
 
+    /**
+     * The JDK home directory containing jextract.
+     */
     @Optional
     @Input
     final Property<String> javaHome = project.objects.property(String)
@@ -53,80 +45,19 @@ class JextractTask extends DefaultTask {
     final ListProperty<String> includes = project.objects.listProperty(String)
 
     /**
-     * Whitelist of header files which should be used for code generation.
-     */
-    @Optional
-    @Input
-    final ListProperty<String> filters = project.objects.listProperty(String)
-
-    /**
-     * The header file which should be parsed by jextract.
-     */
-    @InputFile
-    final Property<String> header = project.objects.property(String)
-
-    /**
      * The output directory in which the generated code will be placed.
      */
     @OutputDirectory
     final DirectoryProperty outputDir = project.objects.directoryProperty()
         .convention(project.layout.buildDirectory.dir("generated/sources/jextract/main/java"))
 
+    @Nested
+    final List<LibraryDefinition> definitions = new ArrayList<>()
+
     JextractTask() { group = 'build' }
 
     @TaskAction
     def action() {
-
-        List<String> arguments = new ArrayList<>()
-
-        // Add source mode flag if it was enabled by the user
-        if (sourceMode.get()) {
-            arguments.add("--source")
-        }
-
-        // Add clang arguments if they are present
-        if (clangArguments.isPresent()) {
-            arguments.add("-C")
-            arguments.add(clangArguments.get())
-        }
-
-        // Add filters if they are present
-        if (filters.isPresent()) {
-            filters.get().forEach { filter ->
-                arguments.add("--filter")
-                arguments.add(filter)
-            }
-        }
-
-        // Add include paths if they are present
-        if (includes.isPresent()) {
-            includes.get().forEach { include ->
-                arguments.add("-I")
-                arguments.add(include)
-            }
-        }
-
-        // Add library names if they are present
-        if (libraries.isPresent()) {
-            if (libraries.get().isEmpty()) {
-                throw new GradleException("At least on library has to be specified")
-            }
-
-            libraries.get().forEach { library ->
-                arguments.add("-l")
-                arguments.add(library)
-            }
-        }
-
-        // Add target package if it is present
-        if (targetPackage.isPresent()) {
-            arguments.add("-t")
-            arguments.add(targetPackage.get())
-        }
-
-        // Set output directory
-        arguments.add("-d")
-        arguments.add(outputDir.get().toString())
 
         // Check if jextract is present
         String javaPath = javaHome.get()
@@ -135,7 +66,115 @@ class JextractTask extends DefaultTask {
             throw new GradleException("jextract binary could not be found (JVM_HOME=${javaPath})")
         }
 
-        execute("${jextractPath.toAbsolutePath()} ${arguments.join(" ")} ${header.get()}")
+
+        for (LibraryDefinition definition : definitions) {
+
+            // Initialize argument list
+            List<String> arguments = new ArrayList<>()
+
+            // Add source mode flag if it was enabled by the user
+            if (sourceMode.get()) {
+                arguments.add("--source")
+            }
+
+            // Add clang arguments if they are present
+            if (clangArguments.isPresent()) {
+                arguments.add("-C")
+                arguments.add(clangArguments.get())
+            }
+
+            // Include specified functions
+            if (definition.functions.isPresent()) {
+                definition.functions.get().forEach { function ->
+                    arguments.add("--include-function")
+                    arguments.add(function)
+                }
+            }
+
+            // Include specified macros
+            if (definition.macros.isPresent()) {
+                definition.macros.get().forEach { macro ->
+                    arguments.add("--include-macro")
+                    arguments.add(macro)
+                }
+            }
+
+            // Include specified structs
+            if (definition.structs.isPresent()) {
+                definition.structs.get().forEach { struct ->
+                    arguments.add("--include-struct")
+                    arguments.add(struct)
+                }
+            }
+
+            // Include specified typedefs
+            if (definition.typedefs.isPresent()) {
+                definition.typedefs.get().forEach { typedef ->
+                    arguments.add("--include-typedef")
+                    arguments.add(typedef)
+                }
+            }
+
+            // Include specified functions
+            if (definition.unions.isPresent()) {
+                definition.unions.get().forEach { union ->
+                    arguments.add("--include-union")
+                    arguments.add(union)
+                }
+            }
+
+            // Include specified functions
+            if (definition.variables.isPresent()) {
+                definition.variables.get().forEach { variable ->
+                    arguments.add("--include-var")
+                    arguments.add(variable)
+                }
+            }
+
+            // Add include paths if they are present
+            if (includes.isPresent()) {
+                includes.get().forEach { include ->
+                    arguments.add("-I")
+                    arguments.add(include)
+                }
+            }
+
+            // Add library names if they are present
+            if (definition.libraries.isPresent()) {
+                if (definition.libraries.get().isEmpty()) {
+                    throw new GradleException("At least on library has to be specified")
+                }
+
+                definition.libraries.get().forEach { library ->
+                    arguments.add("-l")
+                    arguments.add(library)
+                }
+            }
+
+            // Add target package if it is present
+            if (definition.targetPackage.isPresent()) {
+                arguments.add("--target-package")
+                arguments.add(definition.targetPackage.get())
+            }
+
+            if (definition.className.isPresent()) {
+                arguments.add("--header-class-name")
+                arguments.add(definition.className.get())
+            }
+
+            // Set output directory
+            arguments.add("-d")
+            arguments.add(outputDir.get().toString())
+
+            execute("${jextractPath.toAbsolutePath()} ${arguments.join(" ")} ${definition.header.get()}")
+        }
+    }
+
+    void fromHeader(String header, Action<LibraryDefinition> action) {
+        LibraryDefinition definition = project.objects.newInstance(LibraryDefinition)
+        definition.header.set(header)
+        action.execute(definition)
+        definitions.add(definition)
     }
 
     private static void execute(String command) {
@@ -148,7 +187,7 @@ class JextractTask extends DefaultTask {
         // Wait until the process finishes and check if it suceeded
         result.waitForProcessOutput(stdout, stderr)
         if (result.exitValue() != 0) {
-            throw new GradleException("jextract: stdout: ${stdout}. stderr: ${stderr}")
+            throw new GradleException("Invoking jextract failed.\n\n command: ${command}\n stdout: ${stdout}\n stderr: ${stderr}")
         }
     }
 }

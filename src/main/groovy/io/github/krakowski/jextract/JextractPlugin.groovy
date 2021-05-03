@@ -52,6 +52,7 @@ class JextractPlugin implements Plugin<Project> {
             // We need to add the foreign module, so the compiler sees its classes
             project.compileJava.options.compilerArgs += [ '--add-modules', 'jdk.incubator.foreign' ]
             project.compileTestJava.options.compilerArgs += [ '--add-modules', 'jdk.incubator.foreign' ]
+            project.test.jvmArgs += ['--enable-native-access=ALL-UNNAMED', '--add-modules', 'jdk.incubator.foreign']
 
             // The java compiler should only be invoked after
             // jextract generated its source files
@@ -98,7 +99,7 @@ class JextractPlugin implements Plugin<Project> {
         project.plugins.withType(ApplicationPlugin) {
             // We need to add the foreign module, so that the classes are visible at runtime
             project.application.applicationDefaultJvmArgs += [
-                    '-Dforeign.restricted=permit',
+                    '--enable-native-access=ALL-UNNAMED',
                     '--add-modules', 'jdk.incubator.foreign'
             ]
         }
