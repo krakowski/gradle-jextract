@@ -15,7 +15,7 @@ Applying the plugin adds the `jextract` task which can be configured by the buil
 ```gradle
 jextract {
 
-    fromHeader("${project.projectDir}/src/main/c/stdio.h"= {
+    fromHeader("${project.projectDir}/src/main/c/stdio.h)= {
         // The library name
         libraries = [ 'stdc++' ]
     
@@ -27,6 +27,8 @@ jextract {
     }
 }
 ```
+
+There is also a [full demo project](https://github.com/krakowski/jextract-demo) showcasing the `gradle-jextract` plugin.
 
 ## :triangular_ruler: &nbsp; Configuration Options
 
@@ -52,6 +54,14 @@ The `jextract` task exposes the following configuration options.
 
   * [OpenJDK 17 + Project Panama](https://github.com/openjdk/panama-foreign/tree/foreign-jextract)
   * [LLVM 9+](https://releases.llvm.org/download.html)
+
+## :warning: &nbsp; Known issues
+
+- Gradle is often incompatible with newly released Java versions, resulting in the error message `Unsupported class file major version`. The `gradle-jextract` plugin can work around this by using a different JDK for compiling the sources. To enable this feature the `javaHome` property has to be set within your global `gradle.properties` usually located inside `${HOME}/.gradle`.
+
+  ```
+  javaHome=/path/to/your/panama/java/home
+  ```
   
 ## :scroll: &nbsp; License
 
