@@ -17,7 +17,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class JextractTask : DefaultTask() {
+open class JextractTask : DefaultTask() {
 
     /** Arguments which should be passed to clang. */
     @Optional @Input
@@ -141,7 +141,7 @@ class JextractTask : DefaultTask() {
         }
     }
 
-    fun header(header: String, action: Action<LibraryDefinition>) {
+    fun fromHeader(header: String, action: Action<LibraryDefinition>) {
         val definition = project.objects.newInstance<LibraryDefinition>()
         definition.header.set(header)
         action.execute(definition)
