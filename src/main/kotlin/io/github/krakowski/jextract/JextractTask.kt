@@ -48,8 +48,9 @@ open class JextractTask : DefaultTask() {
         // Check if jextract is present
         val javaPath = javaHome.get()
         val jextractPath = Paths.get(javaPath, "bin/jextract")
-        if (!Files.exists(jextractPath))
+        if (!Files.exists(jextractPath)) {
             throw GradleException("jextract binary could not be found (JVM_HOME=$javaPath)")
+        }
 
 
         for (definition in definitions) {
@@ -58,8 +59,9 @@ open class JextractTask : DefaultTask() {
             val arguments = ArrayList<String>()
 
             // Add source mode flag if it was enabled by the user
-            if (sourceMode.get())
+            if (sourceMode.get()) {
                 arguments += "--source"
+            }
 
             // Add clang arguments if they are present
             clangArguments.orNull?.let {
@@ -111,8 +113,9 @@ open class JextractTask : DefaultTask() {
 
             // Add library names if they are present
             definition.libraries.orNull?.let {
-                if (it.isEmpty())
+                if (it.isEmpty()) {
                     throw GradleException("At least on library has to be specified")
+                }
 
                 for (library in it) {
                     arguments += "-l"
@@ -148,47 +151,32 @@ open class JextractTask : DefaultTask() {
 
     companion object {
         private fun execute(command: String) {
-            println("executing: $command")
             // Create buffers for stdout and stderr streams
             val stdout = StringBuffer()
             val stderr = StringBuffer()
-            val result = command.execute()
+            val result = Runtime.getRuntime().exec(command)
 
             // Wait until the process finishes and check if it succeeded
-            result.waitForProcessOutput(stdout, stderr)
-            println("stdout: $stdout")
-            println("stderr: $stderr")
-            println("result: $result")
-            if (result.exitValue() != 0)
-                throw GradleException("Invoking jextract failed.\n\n command: $command\n stdout: $stdout\n stderr: $stderr")
+            result.await(stdout, stderr)
+            if (result.exitValue() != 0) {
+                throw GradleException("Invoking jextract failed.\n\n" +
+                        " command: ${command}\n stdout: ${stdout}\n stderr: ${stderr}")
+            }
         }
 
-        fun String.execute() = Runtime.getRuntime().exec(this)
-
-        fun Process.waitForProcessOutput(output: Appendable?, error: Appendable?) {
-            val tout = ProcessGroovyMethods.consumeProcessOutputStream(this, output)
-            val terr = ProcessGroovyMethods.consumeProcessErrorStream(this, error)
-            var interrupted = false
+        fun Process.await(output: Appendable?, error: Appendable?) {
+            val out = ProcessGroovyMethods.consumeProcessOutputStream(this, output)
+            val err = ProcessGroovyMethods.consumeProcessErrorStream(this, error)
             try {
                 try {
-                    tout.join()
-                } catch (var14: InterruptedException) {
-                    interrupted = true
-                }
-                try {
-                    terr.join()
-                } catch (var13: InterruptedException) {
-                    interrupted = true
-                }
-                try {
+                    out.join()
+                    err.join()
                     waitFor()
-                } catch (var12: InterruptedException) {
-                    interrupted = true
-                }
-                ProcessGroovyMethods.closeStreams(this)
-            } finally {
-                if (interrupted)
+                } catch (_: InterruptedException) {
                     Thread.currentThread().interrupt()
+                }
+            } finally {
+                ProcessGroovyMethods.closeStreams(this)
             }
         }
     }
