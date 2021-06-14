@@ -1,6 +1,5 @@
 package io.github.krakowski.jextract
 
-//import de.undercouch.gradle.tasks.download.Download
 import org.gradle.api.*
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.plugins.ApplicationPlugin
@@ -15,7 +14,10 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.getByName
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.withType
 import java.io.File
 
 class JextractPlugin : Plugin<Project> {
@@ -29,8 +31,9 @@ class JextractPlugin : Plugin<Project> {
         // Create and register jextract task
         val jextractTask = target.tasks.create<JextractTask>("jextract")
 
-        if (target.hasProperty(PROPERTY_JAVA_HOME))
+        if (target.hasProperty(PROPERTY_JAVA_HOME)) {
             jextractTask.javaHome.set(target.property(PROPERTY_JAVA_HOME) as String)
+        }
 
         // Configure Java plugin if it was applied
         target.plugins.withType<JavaPlugin> {
@@ -62,6 +65,7 @@ class JextractPlugin : Plugin<Project> {
                 options.compilerArgs.add("--add-modules")
                 options.compilerArgs.add("jdk.incubator.foreign")
             }
+
             target.test {
                 jvmArgs.add("--enable-native-access=ALL-UNNAMED")
                 jvmArgs.add("--add-modules")

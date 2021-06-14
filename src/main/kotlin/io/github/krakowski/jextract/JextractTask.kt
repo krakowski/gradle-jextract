@@ -12,9 +12,7 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.property
-
 import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
 
 open class JextractTask : DefaultTask() {
