@@ -15,7 +15,7 @@ Applying the plugin adds the `jextract` task which can be configured by the buil
 ```gradle
 jextract {
 
-    fromHeader("${project.projectDir}/src/main/c/stdio.h)= {
+    fromHeader("${project.projectDir}/src/main/c/stdio.h") {
         // The library name
         libraries = [ 'stdc++' ]
     
