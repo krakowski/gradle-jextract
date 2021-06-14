@@ -43,3 +43,7 @@ pluginBundle {
     vcsUrl = "https://github.com/krakowski/gradle-jextract.git"
     tags = listOf("native", "panama", "jextract")
 }
+
+tasks.withType<Wrapper> {
+    gradleVersion = "7.0.2"
+}
