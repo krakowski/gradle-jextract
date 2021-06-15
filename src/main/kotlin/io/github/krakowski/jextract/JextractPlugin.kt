@@ -2,41 +2,40 @@ package io.github.krakowski.jextract
 
 import org.gradle.api.*
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.plugins.ApplicationPlugin
-import org.gradle.api.plugins.ExtensionAware
-import org.gradle.api.plugins.JavaApplication
-import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.tasks.JavaExec
+import org.gradle.api.plugins.*
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.api.tasks.javadoc.Javadoc
 import org.gradle.api.tasks.testing.Test
-import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.getByName
-import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.withType
-import java.io.File
+import org.gradle.internal.jvm.Jvm
+import org.gradle.jvm.toolchain.JavaToolchainService
+import org.gradle.kotlin.dsl.*
 
 class JextractPlugin : Plugin<Project> {
-
-    companion object {
-        private val PROPERTY_JAVA_HOME = "javaHome"
-    }
 
     override fun apply(target: Project) {
 
         // Create and register jextract task
         val jextractTask = target.tasks.create<JextractTask>("jextract")
 
-        if (target.hasProperty(PROPERTY_JAVA_HOME)) {
-            jextractTask.javaHome.set(target.property(PROPERTY_JAVA_HOME) as String)
-        }
+        // Use current JVM as default toolchain for jextract task
+        jextractTask.toolchain.convention(Jvm.current().javaHome.absolutePath.toString())
 
         // Configure Java plugin if it was applied
         target.plugins.withType<JavaPlugin> {
+
+            // Query configured toolchain
+            val service = target.extensions.getByType<JavaToolchainService>()
+            val tool = target.extensions.getByType<JavaPluginExtension>().toolchain
+
+            // Wire up the selected toolchain with the jextract task or fall back to
+            // the current JVM if no toolchain has been specified
+            jextractTask.toolchain.convention(
+                    service.compilerFor(tool)
+                           .map { it.metadata.installationPath.asFile.absolutePath.toString() }
+                           .orElse(Jvm.current().javaHome.absolutePath.toString())
+            )
 
             // To make the generated classes available for our code,
             // we need to add the output directory to the list of source directories
@@ -51,62 +50,29 @@ class JextractPlugin : Plugin<Project> {
             }
 
             // This is necessary in case we use class file mode
-            target.dependencies.implementation(target.files(jextractTask.outputDir))
+            target.dependencies {
+                implementation(target.files(jextractTask.outputDir))
+            }
 
             // Include all generated classes inside our jar archive
-            target.jar {
+            target.withType<Jar> {
                 from(jextractTask.outputDir) {
                     include("**/*.class")
                 }
             }
 
-            // We need to add the foreign module, so the compiler sees its classes
+            // We need to add the foreign module, so the compiler sees its classes and
+            // the java compiler should only be invoked after jextract generated its source files
             target.withType<JavaCompile> {
+                dependsOn(jextractTask)
                 options.compilerArgs.add("--add-modules")
                 options.compilerArgs.add("jdk.incubator.foreign")
             }
 
-            target.test {
+            target.withType<Test> {
                 jvmArgs.add("--enable-native-access=ALL-UNNAMED")
                 jvmArgs.add("--add-modules")
                 jvmArgs.add("jdk.incubator.foreign")
-            }
-
-            // The java compiler should only be invoked after jextract generated its source files
-            target.compileJava { dependsOn(jextractTask) }
-
-
-            // Set custom java home for compiling sources in case Gradle is not compatible with the current JDK.
-            // https://docs.gradle.org/current/userguide/building_java_projects.html#example_configure_java_7_build
-            if (target.hasProperty(PROPERTY_JAVA_HOME)) {
-
-                val javaExecutablesPath = File(jextractTask.javaHome.get(), "bin")
-                fun javaExecutables(execName: String) = File(javaExecutablesPath, execName).also {
-                    assert(it.exists()) { "There is no $execName executable in $javaExecutablesPath" }
-                }
-
-                // Set java home path
-                target.tasks.withType<JavaCompile> {
-                    options.apply {
-                        isFork = true
-                        forkOptions.javaHome = target.file(jextractTask.javaHome.get())
-                    }
-                }
-
-                // Set javadoc executable
-                target.tasks.withType<Javadoc> {
-                    executable = javaExecutables("javadoc").toString()
-                }
-
-                // Set java executable for tests
-                target.tasks.withType<Test> {
-                    executable(javaExecutables("java"))
-                }
-
-                // Set java executable for execution
-                target.tasks.withType<JavaExec> {
-                    executable(javaExecutables("java"))
-                }
             }
         }
 
@@ -124,9 +90,6 @@ fun Project.sourceSets(configure: Action<SourceSetContainer>) = (this as Extensi
 val SourceSetContainer.main: NamedDomainObjectProvider<SourceSet> get() = named<SourceSet>("main")
 operator fun <T> NamedDomainObjectProvider<T>.invoke(action: T.() -> Unit) = configure(action)
 fun DependencyHandler.implementation(dependencyNotation: Any) = add("implementation", dependencyNotation)
-val Project.jar get() = tasks.named<Jar>("jar")
-val Project.compileJava: TaskProvider<JavaCompile> get() = tasks.named<JavaCompile>("compileJava")
 inline fun <reified S : Task> Project.withType(noinline configuration: S.() -> Unit): DomainObjectCollection<in S> = tasks.withType(S::class.java, configuration)
-val Project.test: TaskProvider<Test> get() = tasks.named<Test>("test")
 val Project.application: JavaApplication get() = (this as ExtensionAware).extensions.getByName<JavaApplication>("application")
 

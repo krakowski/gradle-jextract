@@ -5,53 +5,48 @@ import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.internal.jvm.Jvm
-import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.property
 import java.nio.file.Files
 import java.nio.file.Paths
 
-open class JextractTask : DefaultTask() {
+abstract class JextractTask : DefaultTask() {
+
+    @get:Input
+    val toolchain: Property<String> = project.objects.property()
 
     /** Arguments which should be passed to clang. */
-    @Optional @Input
+    @get:Optional @get:Input
     val clangArguments: Property<String> = project.objects.property()
 
     /** Whether to generate sources or precompiled class files */
-    @Input
-    val sourceMode: Property<Boolean> = project.objects.property<Boolean>().convention(false)
-
-    /** The JDK home directory containing jextract. */
-    @Optional @Input
-    val javaHome: Property<String> = project.objects.property<String>().convention(Jvm.current().javaHome.absolutePath)
-
-    /** Directories which should be included during code generation. */
-    @Optional @Input
-    val includes: ListProperty<String> = project.objects.listProperty()
+    @get:Input
+    val sourceMode: Property<Boolean> = project.objects.property<Boolean>()
+            .convention(false)
 
     /** The output directory in which the generated code will be placed. */
-    @OutputDirectory
-    val outputDir: DirectoryProperty = project.objects.directoryProperty().convention(project.layout.buildDirectory.dir("generated/sources/jextract/main/java"))
+    @get:OutputDirectory
+    val outputDir: DirectoryProperty = project.objects.directoryProperty()
+            .convention(project.layout.buildDirectory.dir("generated/sources/jextract/main/java"))
 
-    @Nested
+    @get:Nested
     val definitions = ArrayList<LibraryDefinition>()
 
-    init { group = "build" }
+    init {
+        group = "build"
+    }
 
     @TaskAction
     fun action() {
 
         // Check if jextract is present
-        val javaPath = javaHome.get()
-        val jextractPath = Paths.get(javaPath, "bin/jextract")
-        if (!Files.exists(jextractPath)) {
-            throw GradleException("jextract binary could not be found (JVM_HOME=$javaPath)")
+        val javaPath = toolchain.get()
+        val jextractBinary = Paths.get(javaPath, "bin/jextract")
+        if (Files.notExists(jextractBinary)) {
+            throw GradleException("jextract binary could not be found at ${jextractBinary}")
         }
-
 
         for (definition in definitions) {
 
@@ -138,11 +133,11 @@ open class JextractTask : DefaultTask() {
             arguments += "-d"
             arguments += outputDir.get().toString()
 
-            execute("${jextractPath.toAbsolutePath()} ${arguments.joinToString(" ")} ${definition.header.get()}")
+            execute("${jextractBinary} ${arguments.joinToString(" ")} ${definition.header.get()}")
         }
     }
 
-    fun fromHeader(header: String, action: Action<LibraryDefinition>) {
+    fun header(header: String, action: Action<LibraryDefinition>) {
         val definition = project.objects.newInstance<LibraryDefinition>()
         definition.header.set(header)
         action.execute(definition)

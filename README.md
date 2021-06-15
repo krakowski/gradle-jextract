@@ -6,7 +6,7 @@ Since the plugin is available on [Gradle's Plugin Portal](https://plugins.gradle
 
 ```gradle
 plugins {
-  id "io.github.krakowski.jextract" version "0.1.6"
+  id "io.github.krakowski.jextract" version "0.2.0"
 }
 ```
 
@@ -15,7 +15,7 @@ Applying the plugin adds the `jextract` task which can be configured by the buil
 ```gradle
 jextract {
 
-    fromHeader("${project.projectDir}/src/main/c/stdio.h") {
+    header("${project.projectDir}/src/main/c/stdio.h") {
         // The library name
         libraries = [ 'stdc++' ]
     
@@ -26,6 +26,26 @@ jextract {
         className = 'Linux'
     }
 }
+```
+
+If the Gradle [Java Plugin](https://docs.gradle.org/current/userguide/java_plugin.html) or
+[Application plugin](https://docs.gradle.org/current/userguide/application_plugin.html) is applied, the `gradle-jextract`
+plugin configures them and uses the configured toolchain for its task, which can be set as follows.
+
+```
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
+}
+```
+
+If your JDK is not installed in one of the default locations, Gradle can be instructed to search in a custom location.
+To enable this feature the `org.gradle.java.installations.paths` property has to be set within your global `gradle.properties`
+file usually located inside `${HOME}/.gradle`.
+
+```
+org.gradle.java.installations.paths=/custom/path/jdk17
 ```
 
 There is also a [full demo project](https://github.com/krakowski/jextract-demo) showcasing the `gradle-jextract` plugin.
@@ -54,14 +74,6 @@ The `jextract` task exposes the following configuration options.
 
   * [OpenJDK 17 + Project Panama](https://github.com/openjdk/panama-foreign/tree/foreign-jextract)
   * [LLVM 9+](https://releases.llvm.org/download.html)
-
-## :warning: &nbsp; Known issues
-
-- Gradle is often incompatible with newly released Java versions, resulting in the error message `Unsupported class file major version`. The `gradle-jextract` plugin can work around this by using a different JDK for compiling the sources. To enable this feature the `javaHome` property has to be set within your global `gradle.properties` usually located inside `${HOME}/.gradle`.
-
-  ```
-  javaHome=/path/to/your/panama/java/home
-  ```
   
 ## :scroll: &nbsp; License
 
