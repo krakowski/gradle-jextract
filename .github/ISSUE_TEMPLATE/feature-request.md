@@ -1,8 +1,8 @@
 ---
-name: ":wrench: Feature Request"
-about: Propose a new feature
+name: 'Feature Request'
+about: 'Propose a new feature'
 title: ''
-labels: enhancement
+labels: 'enhancement'
 assignees: ''
 
 ---

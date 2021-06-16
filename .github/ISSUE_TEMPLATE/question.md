@@ -1,8 +1,8 @@
 ---
-name: ":thought_balloon: Question"
-about: Ask a general question
+name: 'Question'
+about: 'Ask a general question'
 title: ''
-labels: question
+labels: 'question'
 assignees: ''
 
 ---

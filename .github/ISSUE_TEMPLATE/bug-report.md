@@ -1,8 +1,8 @@
 ---
-name: ":bug: Bug report"
-about: Report an error in the code
+name: 'Bug report'
+about: 'Report an error in the code'
 title: ''
-labels: bug
+labels: 'bug'
 assignees: ''
 
 ---
