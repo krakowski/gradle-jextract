@@ -1,10 +1,11 @@
 package io.github.krakowski.jextract
 
-import org.gradle.api.*
-import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.plugins.*
-import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.api.plugins.ApplicationPlugin
+import org.gradle.api.plugins.JavaApplication
+import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
@@ -25,23 +26,28 @@ class JextractPlugin : Plugin<Project> {
         // Configure Java plugin if it was applied
         target.plugins.withType<JavaPlugin> {
 
-            // Query configured toolchain
+            // Query java plugin extensions
+            val extension = target.extensions.getByType<JavaPluginExtension>()
             val service = target.extensions.getByType<JavaToolchainService>()
-            val tool = target.extensions.getByType<JavaPluginExtension>().toolchain
 
             // Wire up the selected toolchain with the jextract task or fall back to
             // the current JVM if no toolchain has been specified
             jextractTask.toolchain.convention(
-                    service.compilerFor(tool)
+                    service.compilerFor(extension.toolchain)
                            .map { it.metadata.installationPath.asFile.absolutePath.toString() }
                            .orElse(Jvm.current().javaHome.absolutePath.toString())
             )
 
             // To make the generated classes available for our code,
             // we need to add the output directory to the list of source directories
-            target.sourceSets {
-                main {
-                    java.srcDirs += jextractTask.outputDir.asFile.get()
+            extension.sourceSets {
+                named("main") {
+
+                    // Add generated sources to source set
+                    java.srcDirs(
+                            java.srcDirs,
+                            jextractTask.outputDir.asFile.get()
+                    )
 
                     // This is necessary since jextract generates a compiled class file containing constants
                     compileClasspath += target.files(jextractTask.outputDir)
@@ -51,11 +57,11 @@ class JextractPlugin : Plugin<Project> {
 
             // This is necessary in case we use class file mode
             target.dependencies {
-                implementation(target.files(jextractTask.outputDir))
+                add("implementation", target.files(jextractTask.outputDir))
             }
 
             // Include all generated classes inside our jar archive
-            target.withType<Jar> {
+            target.tasks.withType<Jar> {
                 from(jextractTask.outputDir) {
                     include("**/*.class")
                 }
@@ -63,13 +69,13 @@ class JextractPlugin : Plugin<Project> {
 
             // We need to add the foreign module, so the compiler sees its classes and
             // the java compiler should only be invoked after jextract generated its source files
-            target.withType<JavaCompile> {
+            target.tasks.withType<JavaCompile> {
                 dependsOn(jextractTask)
                 options.compilerArgs.add("--add-modules")
                 options.compilerArgs.add("jdk.incubator.foreign")
             }
 
-            target.withType<Test> {
+            target.tasks.withType<Test> {
                 jvmArgs.add("--enable-native-access=ALL-UNNAMED")
                 jvmArgs.add("--add-modules")
                 jvmArgs.add("jdk.incubator.foreign")
@@ -78,18 +84,14 @@ class JextractPlugin : Plugin<Project> {
 
         // Configure application plugin if it was applied
         target.plugins.withType<ApplicationPlugin> {
+
+            val extension = target.extensions.getByType<JavaApplication>()
+
             // We need to add the foreign module, so that the classes are visible at runtime
-            target.application.applicationDefaultJvmArgs = target.application.applicationDefaultJvmArgs +
-                    "--enable-native-access=ALL-UNNAMED" + "--add-modules" + "jdk.incubator.foreign"
+            extension.applicationDefaultJvmArgs += listOf(
+                    "--enable-native-access=ALL-UNNAMED",
+                    "--add-modules", "jdk.incubator.foreign"
+            )
         }
     }
 }
-
-// dsl helpers, we don't have the nice dsl kotlin available here
-fun Project.sourceSets(configure: Action<SourceSetContainer>) = (this as ExtensionAware).extensions.configure("sourceSets", configure)
-val SourceSetContainer.main: NamedDomainObjectProvider<SourceSet> get() = named<SourceSet>("main")
-operator fun <T> NamedDomainObjectProvider<T>.invoke(action: T.() -> Unit) = configure(action)
-fun DependencyHandler.implementation(dependencyNotation: Any) = add("implementation", dependencyNotation)
-inline fun <reified S : Task> Project.withType(noinline configuration: S.() -> Unit): DomainObjectCollection<in S> = tasks.withType(S::class.java, configuration)
-val Project.application: JavaApplication get() = (this as ExtensionAware).extensions.getByName<JavaApplication>("application")
-
