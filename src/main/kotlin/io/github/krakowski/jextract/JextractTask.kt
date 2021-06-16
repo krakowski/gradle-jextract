@@ -24,7 +24,7 @@ abstract class JextractTask : DefaultTask() {
     /** Whether to generate sources or precompiled class files */
     @get:Input
     val sourceMode: Property<Boolean> = project.objects.property<Boolean>()
-            .convention(false)
+            .convention(true)
 
     /** The output directory in which the generated code will be placed. */
     @get:OutputDirectory
