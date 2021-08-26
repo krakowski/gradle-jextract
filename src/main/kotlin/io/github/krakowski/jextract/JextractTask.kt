@@ -7,6 +7,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.property
 import java.nio.file.Files
@@ -43,7 +44,11 @@ abstract class JextractTask : DefaultTask() {
 
         // Check if jextract is present
         val javaPath = toolchain.get()
-        val jextractBinary = Paths.get(javaPath, "bin/jextract")
+        val jextractBinary = if (OperatingSystem.current().isWindows) {
+            Paths.get(javaPath, "bin/jextract.exe")
+        } else {
+            Paths.get(javaPath, "bin/jextract")
+        }
         if (Files.notExists(jextractBinary)) {
             throw GradleException("jextract binary could not be found at ${jextractBinary}")
         }
