@@ -5,11 +5,8 @@ plugins {
     // Apply the Kotlin DSL Plugin for enhanced IDE support
     `kotlin-dsl`
 
-    // Apply the Kotlin JVM plugin to add support for Kotlin
-    id("org.jetbrains.kotlin.jvm") version "1.4.31"
-
     // Apply the Plugin Publishing Plugin to publish plugins to the Gradle Plugins Portal
-    id("com.gradle.plugin-publish") version "0.15.0"
+    id("com.gradle.plugin-publish") version "0.20.0"
 }
 
 group = "io.github.krakowski"
@@ -25,6 +22,24 @@ dependencies {
 
     // Use the Kotlin JDK 8 standard library
     implementation(kotlin("stdlib-jdk8"))
+}
+
+java {
+    // explicitly target Java 8 (this is not updated when the kotlin jvmTarget is set)
+    // this can be removed when https://youtrack.jetbrains.com/issue/KT-35003 is fixed
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+kotlin {
+    target {
+        compilations.configureEach {
+            kotlinOptions {
+                // explicitly target Java 8
+                jvmTarget = "1.8"
+            }
+        }
+    }
 }
 
 gradlePlugin {
@@ -45,5 +60,5 @@ pluginBundle {
 }
 
 tasks.withType<Wrapper> {
-    gradleVersion = "7.1"
+    gradleVersion = "7.4"
 }
