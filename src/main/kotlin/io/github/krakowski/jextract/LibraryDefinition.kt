@@ -10,6 +10,7 @@ abstract class LibraryDefinition {
 
     /** The library which should be used for generating native bindings. */
     @get:Input
+    @get:Optional
     abstract val libraries: ListProperty<String>
 
     /** The package under which all bindings will be generated. */
