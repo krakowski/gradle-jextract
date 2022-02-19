@@ -113,10 +113,6 @@ abstract class JextractTask : DefaultTask() {
 
             // Add library names if they are present
             definition.libraries.orNull?.let {
-                if (it.isEmpty()) {
-                    throw GradleException("At least on library has to be specified")
-                }
-
                 for (library in it) {
                     arguments += "-l"
                     arguments += library

@@ -57,7 +57,7 @@ The `jextract` task exposes the following configuration options.
 |       Name       |               Type              |    Required    | Description                                                                |
 |:----------------:|:-------------------------------:|:--------------:|----------------------------------------------------------------------------|
 | `clangArguments` |        `java.lang.String`       |                | Arguments which should be passed to clang                                  |
-|    `libraries`   |       `java.lang.String[]`      | :black_circle: | The libraries against which the native code will link                      |
+|    `libraries`   |       `java.lang.String[]`      |                | The libraries against which the native code will link                      |
 |    `includes`    |       `java.lang.String[]`      |                | A list of directories which should be included during code generation      |
 |  `targetPackage` |        `java.lang.String`       | :black_circle: | The package under which all bindings will be generated                     |
 |    `className`   |        `java.lang.String`       |                | The generated class file's name                                            |
