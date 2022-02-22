@@ -6,7 +6,7 @@ Since the plugin is available on [Gradle's Plugin Portal](https://plugins.gradle
 
 ```gradle
 plugins {
-  id "io.github.krakowski.jextract" version "0.2.3"
+  id "io.github.krakowski.jextract" version "0.2.4"
 }
 ```
 
@@ -35,7 +35,7 @@ plugin configures them and uses the configured toolchain for its task, which can
 ```
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(18))
+        languageVersion.set(JavaLanguageVersion.of(19))
     }
 }
 ```
@@ -45,7 +45,7 @@ To enable this feature the `org.gradle.java.installations.paths` property has to
 file usually located inside `${HOME}/.gradle`.
 
 ```
-org.gradle.java.installations.paths=/custom/path/jdk18
+org.gradle.java.installations.paths=/custom/path/jdk19
 ```
 
 There is also a [full demo project](https://github.com/krakowski/jextract-demo) showcasing the `gradle-jextract` plugin.
@@ -72,7 +72,7 @@ The `jextract` task exposes the following configuration options.
 
 ## :wrench: &nbsp; Requirements
 
-  * [OpenJDK 18 + Project Panama](https://github.com/openjdk/panama-foreign/tree/foreign-jextract)
+  * [OpenJDK 19 + Project Panama](https://github.com/openjdk/panama-foreign/tree/foreign-jextract)
   * [LLVM 9+](https://releases.llvm.org/download.html)
   
 ## :scroll: &nbsp; License
