@@ -1,4 +1,4 @@
-This is a Gradle plugin for integrating Project Panama's [`jextract`](http://cr.openjdk.java.net/~mcimadamore/panama/jextract_distilled.html) tool in the build process.
+This is a Gradle plugin for integrating Project Panama's [`jextract`](https://github.com/openjdk/jextract) tool in the build process.
 
 ## :bulb: &nbsp; Example
 
