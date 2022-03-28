@@ -1,5 +1,5 @@
 This is a Gradle plugin for integrating Project Panama's [`jextract`](https://github.com/openjdk/jextract) tool in the build process.
-
+There is also a [full demo project](https://github.com/krakowski/jextract-demo) showcasing the `gradle-jextract` plugin.
 ## :bulb: &nbsp; Example
 
 Since the plugin is available on [Gradle's Plugin Portal](https://plugins.gradle.org/) it can be applied within the build script's `plugins` block.
@@ -48,7 +48,7 @@ file usually located inside `${HOME}/.gradle`.
 org.gradle.java.installations.paths=/custom/path/jdk19
 ```
 
-There is also a [full demo project](https://github.com/krakowski/jextract-demo) showcasing the `gradle-jextract` plugin.
+The plugin will first try to find `jextract` inside `PATH` and then fall back to `${JAVA_HOME}/bin`.
 
 ## :triangular_ruler: &nbsp; Configuration Options
 

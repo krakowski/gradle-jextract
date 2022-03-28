@@ -10,8 +10,11 @@ import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.property
+import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.regex.Pattern
 
 abstract class JextractTask : DefaultTask() {
 
@@ -39,18 +42,42 @@ abstract class JextractTask : DefaultTask() {
         group = "build"
     }
 
+    private fun findExecutable(): Path {
+
+        // Select appropriate executable for operating system
+        val operatingSystem = OperatingSystem.current()
+        val executable = if (operatingSystem.isWindows) WINDOWS_EXECUTABLE else UNIX_EXECUTABLE
+
+        // Search for jextract in PATH
+        val pathExecutable = System.getenv(ENV_PATH)
+                .split(Pattern.quote(File.pathSeparator)).stream()
+                .map { Paths.get(it, executable) }
+                .filter { Files.exists(it) }
+                .findFirst()
+
+        if (pathExecutable.isPresent) {
+            return pathExecutable.get()
+        }
+
+        // Use bundled jextract binary as a fallback
+        val bundledExecutable = Paths.get(toolchain.get(), "bin", executable)
+        if (Files.exists(bundledExecutable)) {
+            return bundledExecutable
+        }
+
+        throw GradleException("jextract binary could not be found in PATH or at ${bundledExecutable}")
+    }
+
     @TaskAction
     fun action() {
 
-        // Check if jextract is present
-        val javaPath = toolchain.get()
-        val jextractBinary = if (OperatingSystem.current().isWindows) {
-            Paths.get(javaPath, "bin/jextract.exe")
-        } else {
-            Paths.get(javaPath, "bin/jextract")
+        val jextractBinary = findExecutable()
+        if (Files.isDirectory(jextractBinary)) {
+            throw GradleException("${jextractBinary} is not a regular file but a directory")
         }
-        if (Files.notExists(jextractBinary)) {
-            throw GradleException("jextract binary could not be found at ${jextractBinary}")
+
+        if (!Files.isExecutable(jextractBinary)) {
+            throw GradleException("${jextractBinary} is not executable")
         }
 
         for (definition in definitions) {
@@ -145,7 +172,12 @@ abstract class JextractTask : DefaultTask() {
         definitions += definition
     }
 
-    companion object {
+    private companion object {
+
+        const val ENV_PATH = "PATH"
+        const val UNIX_EXECUTABLE = "jextract"
+        const val WINDOWS_EXECUTABLE = "jextract.exe"
+
         private fun execute(command: String) {
             // Create buffers for stdout and stderr streams
             val stdout = StringBuffer()
