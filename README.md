@@ -6,7 +6,7 @@ Since the plugin is available on [Gradle's Plugin Portal](https://plugins.gradle
 
 ```gradle
 plugins {
-  id "io.github.krakowski.jextract" version "0.2.4"
+  id "io.github.krakowski.jextract" version "0.2.5"
 }
 ```
 
