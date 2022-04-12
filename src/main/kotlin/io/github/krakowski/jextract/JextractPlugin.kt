@@ -76,9 +76,10 @@ class JextractPlugin : Plugin<Project> {
             }
 
             target.tasks.withType<Test> {
-                jvmArgs.add("--enable-native-access=ALL-UNNAMED")
-                jvmArgs.add("--add-modules")
-                jvmArgs.add("jdk.incubator.foreign")
+                jvmArgs = listOf(
+                    "--enable-native-access=ALL-UNNAMED",
+                    "--add-modules", "jdk.incubator.foreign"
+                )
             }
         }
 
