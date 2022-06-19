@@ -22,6 +22,10 @@ dependencies {
 
     // Use the Kotlin JDK 8 standard library
     implementation(kotlin("stdlib-jdk8"))
+
+    // Gradle test kit using JUnit
+    testImplementation(gradleTestKit())
+    testImplementation("org.junit.jupiter:junit-jupiter:5.8.2")
 }
 
 java {
@@ -61,4 +65,8 @@ pluginBundle {
 
 tasks.withType<Wrapper> {
     gradleVersion = "7.4"
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
 }
