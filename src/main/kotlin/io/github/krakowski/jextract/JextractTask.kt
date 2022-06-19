@@ -14,7 +14,6 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.regex.Pattern
 
 abstract class JextractTask : DefaultTask() {
 
@@ -49,14 +48,9 @@ abstract class JextractTask : DefaultTask() {
         val executable = if (operatingSystem.isWindows) WINDOWS_EXECUTABLE else UNIX_EXECUTABLE
 
         // Search for jextract in PATH
-        val pathExecutable = System.getenv(ENV_PATH)
-                .split(Pattern.quote(File.pathSeparator)).stream()
-                .map { Paths.get(it, executable) }
-                .filter { Files.exists(it) }
-                .findFirst()
-
-        if (pathExecutable.isPresent) {
-            return pathExecutable.get()
+        System.getenv(ENV_PATH).split(File.pathSeparator).forEach { pathEntry ->
+            val exPath = Paths.get(pathEntry, executable)
+            if (Files.exists(exPath)) return@findExecutable exPath
         }
 
         // Use bundled jextract binary as a fallback
@@ -173,7 +167,6 @@ abstract class JextractTask : DefaultTask() {
     }
 
     private companion object {
-
         const val ENV_PATH = "PATH"
         const val UNIX_EXECUTABLE = "jextract"
         const val WINDOWS_EXECUTABLE = "jextract.exe"
