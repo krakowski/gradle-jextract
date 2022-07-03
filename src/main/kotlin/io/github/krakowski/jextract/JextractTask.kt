@@ -7,6 +7,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Optional
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.property
@@ -14,6 +15,9 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.*
+import kotlin.NoSuchElementException
+import kotlin.collections.ArrayList
 
 abstract class JextractTask : DefaultTask() {
 
@@ -47,19 +51,23 @@ abstract class JextractTask : DefaultTask() {
         val operatingSystem = OperatingSystem.current()
         val executable = if (operatingSystem.isWindows) WINDOWS_EXECUTABLE else UNIX_EXECUTABLE
 
-        // Search for jextract in PATH
-        System.getenv(ENV_PATH).split(File.pathSeparator).forEach { pathEntry ->
-            val exPath = Paths.get(pathEntry, executable)
-            if (Files.exists(exPath)) return@findExecutable exPath
-        }
-
-        // Use bundled jextract binary as a fallback
+        // Try bundled jextract binary first to ensure compatibility with the currently used JDK
         val bundledExecutable = Paths.get(toolchain.get(), "bin", executable)
         if (Files.exists(bundledExecutable)) {
             return bundledExecutable
         }
 
-        throw GradleException("jextract binary could not be found in PATH or at ${bundledExecutable}")
+        // Search for jextract in PATH if JDK has no bundled binary
+        val pathExecutable = System.getenv(ENV_PATH)
+                .split(File.pathSeparator)
+                .map { path -> Paths.get(path, executable) }
+                .filter { path -> Files.exists(path) }
+
+        try {
+            return pathExecutable.first()
+        } catch (exception: NoSuchElementException) {
+            throw GradleException("jextract binary could not be found in PATH or at ${bundledExecutable}")
+        }
     }
 
     @TaskAction
