@@ -67,18 +67,17 @@ class JextractPlugin : Plugin<Project> {
                 }
             }
 
-            // We need to add the foreign module, so the compiler sees its classes and
+            // We need to enable the preview mode, so the compiler sees jdk.lang.foreign classes and
             // the java compiler should only be invoked after jextract generated its source files
             target.tasks.withType<JavaCompile> {
                 dependsOn(jextractTask)
-                options.compilerArgs.add("--add-modules")
-                options.compilerArgs.add("jdk.incubator.foreign")
+                options.compilerArgs.add("--enable-preview")
             }
 
             target.tasks.withType<Test> {
                 jvmArgs = listOf(
                     "--enable-native-access=ALL-UNNAMED",
-                    "--add-modules", "jdk.incubator.foreign"
+                    "--enable-preview"
                 )
             }
         }
@@ -88,10 +87,10 @@ class JextractPlugin : Plugin<Project> {
 
             val extension = target.extensions.getByType<JavaApplication>()
 
-            // We need to add the foreign module, so that the classes are visible at runtime
+            // We need to enable the preview mode, so that the jdk.lang.foreign classes are visible at runtime
             extension.applicationDefaultJvmArgs += listOf(
                     "--enable-native-access=ALL-UNNAMED",
-                    "--add-modules", "jdk.incubator.foreign"
+                    "--enable-preview"
             )
         }
     }

@@ -58,7 +58,8 @@ abstract class JextractTask : DefaultTask() {
         }
 
         // Search for jextract in PATH if JDK has no bundled binary
-        val pathExecutable = System.getenv(ENV_PATH)
+        val envPath = System.getenv(ENV_PATH)
+        val pathExecutable = envPath
                 .split(File.pathSeparator)
                 .map { path -> Paths.get(path, executable) }
                 .filter { path -> Files.exists(path) }
@@ -66,7 +67,7 @@ abstract class JextractTask : DefaultTask() {
         try {
             return pathExecutable.first()
         } catch (exception: NoSuchElementException) {
-            throw GradleException("jextract binary could not be found in PATH or at ${bundledExecutable}")
+            throw GradleException("jextract binary could not be found in PATH or at ${bundledExecutable}\n\t↳ PATH=${envPath}")
         }
     }
 
@@ -160,7 +161,7 @@ abstract class JextractTask : DefaultTask() {
             }
 
             // Set output directory
-            arguments += "-d"
+            arguments += "--output"
             arguments += outputDir.get().toString()
 
             execute("${jextractBinary} ${arguments.joinToString(" ")} ${definition.header.get()}")
