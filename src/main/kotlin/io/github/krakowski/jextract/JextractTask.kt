@@ -88,6 +88,9 @@ abstract class JextractTask : DefaultTask() {
             // Initialize argument list
             val arguments = ArrayList<String>()
 
+            // Add jextract binary as first argument
+            arguments += jextractBinary.toString()
+
             // Add source mode flag if it was enabled by the user
             if (sourceMode.get()) {
                 arguments += "--source"
@@ -164,7 +167,11 @@ abstract class JextractTask : DefaultTask() {
             arguments += "--output"
             arguments += outputDir.get().toString()
 
-            execute("${jextractBinary} ${arguments.joinToString(" ")} ${definition.header.get()}")
+            // Set header file
+            arguments += definition.header.get()
+
+            // Execute command
+            execute(arguments.toTypedArray())
         }
     }
 
@@ -178,9 +185,9 @@ abstract class JextractTask : DefaultTask() {
     private companion object {
         const val ENV_PATH = "PATH"
         const val UNIX_EXECUTABLE = "jextract"
-        const val WINDOWS_EXECUTABLE = "jextract.exe"
+        const val WINDOWS_EXECUTABLE = "jextract.bat"
 
-        private fun execute(command: String) {
+        private fun execute(command: Array<String>) {
             // Create buffers for stdout and stderr streams
             val stdout = StringBuffer()
             val stderr = StringBuffer()
