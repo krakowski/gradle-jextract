@@ -138,6 +138,12 @@ abstract class JextractTask : DefaultTask() {
                 arguments += it
             }
 
+            // Include specified preprocessor macros
+            definition.definedMacros.orNull?.forEach {
+                arguments += "-D"
+                arguments += it
+            }
+
             // Add include paths if they are present
             definition.includes.orNull?.forEach {
                 arguments += "-I"
