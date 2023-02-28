@@ -52,4 +52,8 @@ abstract class LibraryDefinition {
     /** Whitelist of global variables. */
     @get:Optional @get:Input
     abstract val variables: ListProperty<String>
+
+    /** List of additional defined C preprocessor macros. */
+    @get:Optional @get:Input
+    abstract val definedMacros: ListProperty<String>
 }

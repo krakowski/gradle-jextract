@@ -67,6 +67,7 @@ The `jextract` task exposes the following configuration options.
 |    `typedefs`    |       `java.lang.String[]`      |                | Whitelist of typedef symbols                                               |
 |     `unions`     |       `java.lang.String[]`      |                | Whitelist of union symbols                                                 |
 |    `variables`   |       `java.lang.String[]`      |                | Whitelist of global variable symbols                                       |
+|  `definedMacros` |       `java.lang.String[]`      |                | List of additional defined C preprocessor macros                           |
 |   `sourceMode`   |       `java.lang.Boolean`       |                | Generate source files instead of class files (default: `true`)             |
 |    `outputDir`   | `org.gradle.api.file.Directory` |                | The output directory under which the generated source files will be placed |
 
