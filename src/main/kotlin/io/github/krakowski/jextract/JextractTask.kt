@@ -109,8 +109,8 @@ abstract class JextractTask : DefaultTask() {
             }
 
             // Include specified macros
-            definition.macros.orNull?.forEach {
-                arguments += "--include-macro"
+            definition.constants.orNull?.forEach {
+                arguments += "--include-constant"
                 arguments += it
             }
 

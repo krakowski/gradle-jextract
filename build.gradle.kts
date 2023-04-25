@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "io.github.krakowski"
-version = "0.3.2"
+version = "0.4.0"
 
 repositories {
     mavenCentral()
@@ -64,7 +64,7 @@ pluginBundle {
 }
 
 tasks.withType<Wrapper> {
-    gradleVersion = "7.5.1"
+    gradleVersion = "8.1.1"
 }
 
 tasks.withType<Test>().configureEach {

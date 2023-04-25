@@ -33,9 +33,9 @@ abstract class LibraryDefinition {
     @get:Optional @get:Input
     abstract val functions: ListProperty<String>
 
-    /** Whitelist of macros. */
+    /** Whitelist of macros and enum constants. */
     @get:Optional @get:Input
-    abstract val macros: ListProperty<String>
+    abstract val constants: ListProperty<String>
 
     /** Whitelist of structs. */
     @get:Optional @get:Input
