@@ -1,3 +1,7 @@
+![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/krakowski/gradle-jextract/publish.yml?label=GitHub%20Workflow)
+[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/io.github.krakowski.jextract?label=Gradle%20Plugin%20Portal&color=1e81b0)](https://plugins.gradle.org/plugin/io.github.krakowski.jextract)
+
+
 This is a Gradle plugin for integrating Project Panama's [`jextract`](https://github.com/openjdk/jextract) tool in the build process.
 There is also a [full demo project](https://github.com/krakowski/jextract-demo) showcasing the `gradle-jextract` plugin.
 ## :bulb: &nbsp; Example
@@ -6,7 +10,7 @@ Since the plugin is available on [Gradle's Plugin Portal](https://plugins.gradle
 
 ```gradle
 plugins {
-  id "io.github.krakowski.jextract" version "0.4.0"
+  id "io.github.krakowski.jextract" version "0.4.1"
 }
 ```
 

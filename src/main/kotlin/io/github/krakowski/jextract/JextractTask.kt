@@ -203,7 +203,7 @@ abstract class JextractTask : DefaultTask() {
             result.await(stdout, stderr)
             if (result.exitValue() != 0) {
                 throw GradleException("Invoking jextract failed.\n\n" +
-                        " command: ${command}\n stdout: ${stdout}\n stderr: ${stderr}")
+                        " command: ${command.joinToString(" ")}\n stdout: ${stdout}\n stderr: ${stderr}")
             }
         }
 
