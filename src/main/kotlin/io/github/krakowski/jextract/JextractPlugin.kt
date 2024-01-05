@@ -44,20 +44,17 @@ class JextractPlugin : Plugin<Project> {
                 named("main") {
 
                     // Add generated sources to source set
-                    java.srcDirs(
-                            java.srcDirs,
-                            jextractTask.outputDir.asFile.get()
-                    )
+                    java.srcDir(jextractTask)
 
                     // This is necessary since jextract generates a compiled class file containing constants
-                    compileClasspath += target.files(jextractTask.outputDir)
-                    runtimeClasspath += target.files(jextractTask.outputDir)
+                    compileClasspath += target.files(jextractTask)
+                    runtimeClasspath += target.files(jextractTask)
                 }
             }
 
             // This is necessary in case we use class file mode
             target.dependencies {
-                add("implementation", target.files(jextractTask.outputDir))
+                add("implementation", target.files(jextractTask))
             }
 
             // Include all generated classes inside our jar archive
@@ -67,10 +64,8 @@ class JextractPlugin : Plugin<Project> {
                 }
             }
 
-            // We need to enable the preview mode, so the compiler sees jdk.lang.foreign classes and
-            // the java compiler should only be invoked after jextract generated its source files
+            // We need to enable the preview mode, so the compiler sees jdk.lang.foreign classes
             target.tasks.withType<JavaCompile> {
-                dependsOn(jextractTask)
                 options.compilerArgs.add("--enable-preview")
             }
 
