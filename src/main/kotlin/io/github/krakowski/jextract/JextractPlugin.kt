@@ -38,52 +38,23 @@ class JextractPlugin : Plugin<Project> {
                            .orElse(Jvm.current().javaHome.absolutePath.toString())
             )
 
-            // These decisions are based on the value of sourceMode, which is not known until evaluation is complete
-            target.afterEvaluate {
-                // Any changes to sourceMode after this point will cause issues
-                jextractTask.sourceMode.finalizeValue()
-                val isSourceMode = jextractTask.sourceMode.get()
+            // To make the generated classes available for our code,
+            // we need to add the output directory to the list of source directories
+            extension.sourceSets {
+                named("main") {
 
-                // To make the generated classes available for our code,
-                // we need to add the output directory to the list of source directories
-                extension.sourceSets {
-                    named("main") {
+                    // Add generated sources to source set
+                    java.srcDir(jextractTask)
 
-                        if (isSourceMode) {
-                            // Add generated sources to source set
-                            java.srcDir(jextractTask)
-                        }
-
-                        // This is necessary since jextract generates a compiled class file containing constants
-                        compileClasspath += target.files(jextractTask)
-                        runtimeClasspath += target.files(jextractTask)
-                    }
+                    // This is necessary since jextract generates a compiled class file containing constants
+                    compileClasspath += target.files(jextractTask)
+                    runtimeClasspath += target.files(jextractTask)
                 }
-
-                if (!isSourceMode) {
-                    // This is necessary in case we use class file mode
-                    target.dependencies {
-                        add("implementation", target.files(jextractTask))
-                    }
-
-                    // Include all generated classes inside our jar archive
-                    target.tasks.withType<Jar> {
-                        from(jextractTask.outputDir) {
-                            include("**/*.class")
-                        }
-                    }
-                }
-            }
-
-            // We need to enable the preview mode, so the compiler sees jdk.lang.foreign classes
-            target.tasks.withType<JavaCompile> {
-                options.compilerArgs.add("--enable-preview")
             }
 
             target.tasks.withType<Test> {
                 jvmArgs = listOf(
-                    "--enable-native-access=ALL-UNNAMED",
-                    "--enable-preview"
+                    "--enable-native-access=ALL-UNNAMED"
                 )
             }
         }
@@ -95,8 +66,7 @@ class JextractPlugin : Plugin<Project> {
 
             // We need to enable the preview mode, so that the jdk.lang.foreign classes are visible at runtime
             extension.applicationDefaultJvmArgs += listOf(
-                    "--enable-native-access=ALL-UNNAMED",
-                    "--enable-preview"
+                    "--enable-native-access=ALL-UNNAMED"
             )
         }
     }

@@ -24,19 +24,15 @@ abstract class JextractTask : DefaultTask() {
     @get:Input
     val toolchain: Property<String> = project.objects.property()
 
-    /** Arguments which should be passed to clang. */
-    @get:Optional @get:Input
-    val clangArguments: Property<String> = project.objects.property()
-
-    /** Whether to generate sources or precompiled class files */
-    @get:Input
-    val sourceMode: Property<Boolean> = project.objects.property<Boolean>()
-            .convention(true)
-
     /** The output directory in which the generated code will be placed. */
     @get:OutputDirectory
     val outputDir: DirectoryProperty = project.objects.directoryProperty()
             .convention(project.layout.buildDirectory.dir("generated/sources/jextract/main/java"))
+
+    /** Libraries will be loaded in the loader symbol lookup if true. */
+    @get:Input
+    val useSystemLoadLibrary: Property<Boolean> = project.objects.property<Boolean>()
+            .convention(false)
 
     @get:Nested
     val definitions = ArrayList<LibraryDefinition>()
@@ -90,17 +86,6 @@ abstract class JextractTask : DefaultTask() {
 
             // Add jextract binary as first argument
             arguments += jextractBinary.toString()
-
-            // Add source mode flag if it was enabled by the user
-            if (sourceMode.get()) {
-                arguments += "--source"
-            }
-
-            // Add clang arguments if they are present
-            clangArguments.orNull?.let {
-                arguments += "-C"
-                arguments += it
-            }
 
             // Include specified functions
             definition.functions.orNull?.forEach {
@@ -164,9 +149,15 @@ abstract class JextractTask : DefaultTask() {
                 arguments += it
             }
 
+            // Add header class name if it is present
             definition.className.orNull?.let {
                 arguments += "--header-class-name"
                 arguments += it
+            }
+
+            // Add loader symbol lookup flag if it was enabled by the user
+            if (useSystemLoadLibrary.get()) {
+                arguments += "--use-system-load-library"
             }
 
             // Set output directory
