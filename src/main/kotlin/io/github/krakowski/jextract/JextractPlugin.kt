@@ -51,23 +51,6 @@ class JextractPlugin : Plugin<Project> {
                     runtimeClasspath += target.files(jextractTask)
                 }
             }
-
-            target.tasks.withType<Test> {
-                jvmArgs = listOf(
-                    "--enable-native-access=ALL-UNNAMED"
-                )
-            }
-        }
-
-        // Configure application plugin if it was applied
-        target.plugins.withType<ApplicationPlugin> {
-
-            val extension = target.extensions.getByType<JavaApplication>()
-
-            // We need to enable the preview mode, so that the jdk.lang.foreign classes are visible at runtime
-            extension.applicationDefaultJvmArgs += listOf(
-                    "--enable-native-access=ALL-UNNAMED"
-            )
         }
     }
 }
