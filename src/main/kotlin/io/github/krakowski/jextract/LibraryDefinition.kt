@@ -17,6 +17,10 @@ abstract class LibraryDefinition {
     @get:Input
     abstract val targetPackage: Property<String>
 
+    /** A file containing command line arguments. */
+    @get:Optional @get:Input
+    abstract val argFile: Property<String>
+
     /** The name of the generated header class. */
     @get:Optional @get:Input
     abstract val className: Property<String>

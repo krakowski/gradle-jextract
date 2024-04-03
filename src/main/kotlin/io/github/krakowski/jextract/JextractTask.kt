@@ -164,6 +164,11 @@ abstract class JextractTask : DefaultTask() {
             arguments += "--output"
             arguments += outputDir.get().toString()
 
+            // Add arguments from file if it is present
+            definition.argFile.orNull?.let {
+                arguments += "@${it}"
+            }
+
             // Set header file
             arguments += definition.header.get()
 
