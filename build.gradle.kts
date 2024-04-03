@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "io.github.krakowski"
-version = "0.4.2"
+version = "0.5.0"
 
 repositories {
     mavenCentral()

@@ -10,7 +10,7 @@ Since the plugin is available on [Gradle's Plugin Portal](https://plugins.gradle
 
 ```gradle
 plugins {
-  id "io.github.krakowski.jextract" version "0.4.2"
+  id "io.github.krakowski.jextract" version "0.5.0"
 }
 ```
 
@@ -39,7 +39,7 @@ plugin configures them and uses the configured toolchain for its task, which can
 ```
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(20))
+        languageVersion.set(JavaLanguageVersion.of(22))
     }
 }
 ```
@@ -49,7 +49,7 @@ To enable this feature the `org.gradle.java.installations.paths` property has to
 file usually located inside `${HOME}/.gradle`.
 
 ```
-org.gradle.java.installations.paths=/custom/path/jdk20
+org.gradle.java.installations.paths=/custom/path/jdk22
 ```
 
 The plugin will first try to find `jextract` inside `PATH` and then fall back to `${JAVA_HOME}/bin`.
@@ -58,26 +58,25 @@ The plugin will first try to find `jextract` inside `PATH` and then fall back to
 
 The `jextract` task exposes the following configuration options.
 
-|       Name       |               Type              |    Required    | Description                                                               |
-|:----------------:|:-------------------------------:|:--------------:|---------------------------------------------------------------------------|
-| `clangArguments` |        `java.lang.String`       |                | Arguments which should be passed to clang                                 |
-|   `libraries`    |       `java.lang.String[]`      |                | The libraries against which the native code will link                     |
-|    `includes`    |       `java.lang.String[]`      |                | A list of directories which should be included during code generation     |
-| `targetPackage`  |        `java.lang.String`       | :black_circle: | The package under which all bindings will be generated                    |
-|   `className`    |        `java.lang.String`       |                | The generated class file's name                                           |
-|   `functions`    |       `java.lang.String[]`      |                | Whitelist of function symbols                                             |
-|   `constants`    |       `java.lang.String[]`      |                | Whitelist of macro and enum constant symbols                              |
-|    `structs`     |       `java.lang.String[]`      |                | Whitelist of struct symbols                                               |
-|    `typedefs`    |       `java.lang.String[]`      |                | Whitelist of typedef symbols                                              |
-|     `unions`     |       `java.lang.String[]`      |                | Whitelist of union symbols                                                |
-|   `variables`    |       `java.lang.String[]`      |                | Whitelist of global variable symbols                                      |
-| `definedMacros`  |       `java.lang.String[]`      |                | List of additional defined C preprocessor macros                          |
-|   `sourceMode`   |       `java.lang.Boolean`       |                | Generate source files instead of class files (default: `true`)            |
-|   `outputDir`    | `org.gradle.api.file.Directory` |                | The output directory under which the generated source files will be placed |
+|          Name          |               Type              |    Required    | Description                                                                |
+|:----------------------:|:-------------------------------:|:--------------:|----------------------------------------------------------------------------|
+|      `libraries`       |       `java.lang.String[]`      |                | The libraries against which the native code will link                      |
+|       `includes`       |       `java.lang.String[]`      |                | A list of directories which should be included during code generation      |
+|    `targetPackage`     |        `java.lang.String`       | :black_circle: | The package under which all bindings will be generated                     |
+|      `className`       |        `java.lang.String`       |                | The generated class file's name                                            |
+|      `functions`       |       `java.lang.String[]`      |                | Whitelist of function symbols                                              |
+|      `constants`       |       `java.lang.String[]`      |                | Whitelist of macro and enum constant symbols                               |
+|       `structs`        |       `java.lang.String[]`      |                | Whitelist of struct symbols                                                |
+|       `typedefs`       |       `java.lang.String[]`      |                | Whitelist of typedef symbols                                               |
+|        `unions`        |       `java.lang.String[]`      |                | Whitelist of union symbols                                                 |
+|      `variables`       |       `java.lang.String[]`      |                | Whitelist of global variable symbols                                       |
+|    `definedMacros`     |       `java.lang.String[]`      |                | List of additional defined C preprocessor macros                           |
+| `useSystemLoadLibrary` |       `java.lang.Boolean`       |                | Load libraries into the loader symbol lookup                               |
+|      `outputDir`       | `org.gradle.api.file.Directory` |                | The output directory under which the generated source files will be placed |
 
 ## :wrench: &nbsp; Requirements
 
-  * [OpenJDK 20](https://openjdk.org/projects/jdk/20/)
+  * [OpenJDK 22](https://openjdk.org/projects/jdk/22/)
   * [Project Jextract](https://jdk.java.net/jextract/)
   
 ## :scroll: &nbsp; License
