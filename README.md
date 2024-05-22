@@ -22,10 +22,10 @@ jextract {
     header("${project.projectDir}/src/main/c/stdio.h") {
         // The library name
         libraries = [ 'stdc++' ]
-    
+
         // The package under which all source files will be generated
         targetPackage = 'org.unix'
-        
+
         // The generated class name
         className = 'Linux'
     }
@@ -58,27 +58,28 @@ The plugin will first try to find `jextract` inside `PATH` and then fall back to
 
 The `jextract` task exposes the following configuration options.
 
-|          Name          |               Type              |    Required    | Description                                                                |
-|:----------------------:|:-------------------------------:|:--------------:|----------------------------------------------------------------------------|
-|      `libraries`       |       `java.lang.String[]`      |                | The libraries against which the native code will link                      |
-|       `includes`       |       `java.lang.String[]`      |                | A list of directories which should be included during code generation      |
-|    `targetPackage`     |        `java.lang.String`       | :black_circle: | The package under which all bindings will be generated                     |
-|      `className`       |        `java.lang.String`       |                | The generated class file's name                                            |
-|      `functions`       |       `java.lang.String[]`      |                | Whitelist of function symbols                                              |
-|      `constants`       |       `java.lang.String[]`      |                | Whitelist of macro and enum constant symbols                               |
-|       `structs`        |       `java.lang.String[]`      |                | Whitelist of struct symbols                                                |
-|       `typedefs`       |       `java.lang.String[]`      |                | Whitelist of typedef symbols                                               |
-|        `unions`        |       `java.lang.String[]`      |                | Whitelist of union symbols                                                 |
-|      `variables`       |       `java.lang.String[]`      |                | Whitelist of global variable symbols                                       |
-|    `definedMacros`     |       `java.lang.String[]`      |                | List of additional defined C preprocessor macros                           |
-| `useSystemLoadLibrary` |       `java.lang.Boolean`       |                | Load libraries into the loader symbol lookup                               |
-|      `outputDir`       | `org.gradle.api.file.Directory` |                | The output directory under which the generated source files will be placed |
+|          Name          |               Type                |    Required    | Description                                                                |
+|:----------------------:|:---------------------------------:|:--------------:|----------------------------------------------------------------------------|
+|      `libraries`       |       `java.lang.String[]`        |                | The libraries against which the native code will link                      |
+|       `includes`       |       `java.lang.String[]`        |                | A list of directories which should be included during code generation      |
+|    `targetPackage`     |        `java.lang.String`         | :black_circle: | The package under which all bindings will be generated                     |
+|      `className`       |        `java.lang.String`         |                | The generated class file's name                                            |
+|      `functions`       |       `java.lang.String[]`        |                | Whitelist of function symbols                                              |
+|      `constants`       |       `java.lang.String[]`        |                | Whitelist of macro and enum constant symbols                               |
+|       `structs`        |       `java.lang.String[]`        |                | Whitelist of struct symbols                                                |
+|       `typedefs`       |       `java.lang.String[]`        |                | Whitelist of typedef symbols                                               |
+|        `unions`        |       `java.lang.String[]`        |                | Whitelist of union symbols                                                 |
+|      `variables`       |       `java.lang.String[]`        |                | Whitelist of global variable symbols                                       |
+|    `definedMacros`     |       `java.lang.String[]`        |                | List of additional defined C preprocessor macros                           |
+| `useSystemLoadLibrary` |       `java.lang.Boolean`         |                | Load libraries into the loader symbol lookup                               |
+|      `outputDir`       | `org.gradle.api.file.Directory`   |                | The output directory under which the generated source files will be placed |
+|    `jextractBinary`    | `org.gradle.api.file.RegularFile` |                | The jextract binary to be used                                             |
 
 ## :wrench: &nbsp; Requirements
 
   * [OpenJDK 22](https://openjdk.org/projects/jdk/22/)
   * [Project Jextract](https://jdk.java.net/jextract/)
-  
+
 ## :scroll: &nbsp; License
 
 This project is licensed under the GNU GPLv3 License - see the [LICENSE](LICENSE) file for details.
