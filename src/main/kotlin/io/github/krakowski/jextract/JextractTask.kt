@@ -63,23 +63,30 @@ abstract class JextractTask : DefaultTask() {
         try {
             return pathExecutable.first()
         } catch (exception: NoSuchElementException) {
-            throw GradleException("jextract binary could not be found in PATH or at ${bundledExecutable}\n\t↳ PATH=${envPath}")
+            throw GradleException("jextract binary was not specified and could not be found in PATH or at ${bundledExecutable}\n\t↳ PATH=${envPath}")
         }
     }
 
     @TaskAction
     fun action() {
-
-        val jextractBinary = findExecutable()
-        if (Files.isDirectory(jextractBinary)) {
-            throw GradleException("${jextractBinary} is not a regular file but a directory")
-        }
-
-        if (!Files.isExecutable(jextractBinary)) {
-            throw GradleException("${jextractBinary} is not executable")
-        }
+        var systemJextractBinary: Path? = null
 
         for (definition in definitions) {
+            var jextractBinary = definition.jextractBinary.getAsFile().getOrNull()?.toPath()
+            if (jextractBinary == null) {
+                if (systemJextractBinary == null) {
+                    systemJextractBinary = findExecutable()
+                }
+                jextractBinary = systemJextractBinary
+            }
+
+            if (Files.isDirectory(jextractBinary)) {
+                throw GradleException("${jextractBinary} is not a regular file but a directory")
+            }
+
+            if (!Files.isExecutable(jextractBinary)) {
+                throw GradleException("${jextractBinary} is not executable")
+            }
 
             // Initialize argument list
             val arguments = ArrayList<String>()

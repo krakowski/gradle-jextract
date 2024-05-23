@@ -2,6 +2,7 @@ package io.github.krakowski.jextract
 
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
@@ -60,4 +61,8 @@ abstract class LibraryDefinition {
     /** List of additional defined C preprocessor macros. */
     @get:Optional @get:Input
     abstract val definedMacros: ListProperty<String>
+
+    /** The jextract binary to be used. */
+    @get:Optional @get:InputFile
+    abstract val jextractBinary: RegularFileProperty
 }
