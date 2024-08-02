@@ -74,6 +74,12 @@ The `jextract` task exposes the following configuration options.
 | `useSystemLoadLibrary` |       `java.lang.Boolean`       |                | Load libraries into the loader symbol lookup                               |
 |      `outputDir`       | `org.gradle.api.file.Directory` |                | The output directory under which the generated source files will be placed |
 
+
+> *libraries* option can use simple library name "stdc++" or full path to the shared libraries.
+> Full path need to be prefixed with ":" character.
+> For example ":/usr/lib/libstdc++.so" 
+> [doc](https://github.com/openjdk/jextract/blob/master/doc/GUIDE.md#library-loading)
+
 ## :wrench: &nbsp; Requirements
 
   * [OpenJDK 22](https://openjdk.org/projects/jdk/22/)
