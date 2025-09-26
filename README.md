@@ -17,7 +17,7 @@ plugins {
 Applying the plugin adds the `jextract` task which can be configured by the build script.
 
 ```gradle
-jextract {
+tasks.jextract {
 
     header("${project.projectDir}/src/main/c/stdio.h") {
         // The library name
